@@ -3,6 +3,7 @@
 
 #include "map.h"
 #include "settings.h"
+#include "game.h"
 
 #include <QMainWindow>
 #include <QGridLayout>
@@ -26,15 +27,19 @@ class MainWindow : public QMainWindow
     QPushButton*    first;
     QPushButton*    settings;
 
+    Game*           game; // Логика игры
+
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 signals:
-    void settingsRequest(int rows, int columns);
+    void settingsRequest();
+    void changeGameCondition(Game::GameCondition newCondition);
 
 private slots:
     void openSettings();
+    void closeSettings();
 };
 
 #endif // MAINWINDOW_H

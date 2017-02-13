@@ -9,22 +9,21 @@ class Map : public QTableWidget
     Q_OBJECT
 
 public:
-    enum CellCondition { DEAD = 0, LIVE = 1 };
-
     Map(QWidget* parent = nullptr);
     Map(int rows, int columns, QWidget* parent = nullptr);
 
 private: // methods
     void init();
 
-public slots:
+signals:
+    void initBinaryMap(int rows, int columns);
     void switchCellCondition(int row, int column);
+    void settingsRequest(int rows, int columns);
+
+private slots:
     void switchBackground(QTableWidgetItem* item);
-
-private:
-    typedef QVector<QVector<CellCondition> > BinaryMap;
-
-    BinaryMap map;
+    void getSettings(int rows, int columns);
+    void setCellColorByCondition(int row, int column, bool condition);
 };
 
 #endif // MAP_H

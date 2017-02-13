@@ -11,23 +11,12 @@ Map::Map(QWidget* parent)
 Map::Map(int rows, int columns, QWidget *parent)
     :QTableWidget(rows, columns, parent)
 {
-    connect(this,
-            SIGNAL(cellClicked(int, int)),
-            SLOT(switchCellCondition(int, int))
-            );
-
-    connect(this,
-            SIGNAL(itemClicked(QTableWidgetItem*)),
-            SLOT(switchBackground(QTableWidgetItem*))
-            );
+    emit initBinaryMap(rows, columns);
 
     for(int i = 0; i < rows; ++i)
     {
-        map.push_back(QVector<CellCondition>());
         for(int j = 0; j < columns; ++j)
         {
-            map[i].push_back(CellCondition::DEAD);
-
             QTableWidgetItem* item = new QTableWidgetItem;
             item->setBackgroundColor(Qt::white);
             setItem(i, j, item);
@@ -46,15 +35,11 @@ void Map::init()
     verticalHeader()->hide();
     horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     horizontalHeader()->hide();
-}
 
-void Map::switchCellCondition(int row, int column)
-{
-    // Если игра еще не началась
-    if(map[row][column] == CellCondition::DEAD)
-        map[row][column] = CellCondition::LIVE;
-    else
-        map[row][column] = CellCondition::DEAD;
+    connect(this,
+            SIGNAL(itemClicked(QTableWidgetItem*)),
+            SLOT(switchBackground(QTableWidgetItem*))
+            );
 }
 
 void Map::switchBackground(QTableWidgetItem* item)
@@ -64,3 +49,34 @@ void Map::switchBackground(QTableWidgetItem* item)
     else
         item->setBackgroundColor(Qt::white);
 }
+
+void Map::getSettings(int rows, int columns)
+{
+    if(rowCount() != rows || columnCount() != columns)
+    {
+        setRowCount(rows);
+        setColumnCount(columns);
+
+        for(int i = 0; i < rows; ++i)
+        {
+            for(int j = 0; j < columns; ++j)
+            {
+                if(item(i, j) == nullptr)
+                {
+                    QTableWidgetItem* item = new QTableWidgetItem;
+                    item->setBackgroundColor(Qt::white);
+                    setItem(i, j, item);
+                }
+            }
+        }
+    }
+}
+
+void Map::setCellColorByCondition(int row, int column, bool condition)
+{
+    QTableWidgetItem* tempItem = item(row, column);
+    if(condition == false)
+        tempItem->setBackgroundColor(Qt::white);
+    else tempItem->setBackgroundColor(Qt::red);
+}
+

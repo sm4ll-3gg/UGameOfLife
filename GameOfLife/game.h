@@ -1,27 +1,45 @@
-#ifndef LIFE_H
-#define LIFE_H
+#ifndef Game_H
+#define Game_H
 
 #include "map.h"
 
+#include <QObject>
 #include <QVector>
 
-class Life
+class Game : public QObject
 {
+    Q_OBJECT
+
 public:
-    enum GameCondition { BEFOTRE_GAME, DURING_THE_GAME };
+    enum CellCondition { DEAD = 0, LIVE = 1 };
+    enum GameCondition { BEFOTRE_GAME = 0, DURING_THE_GAME = 1 };
 
-    Life();
-
-    void    step();
+    Game();
 
 private: // methods
-    bool    come_to_live(int i, int j); // condition - текущее состояние клетки
-    int     check_around(int i, int j);
+    void            step();
+    CellCondition   come_to_live(int i, int j); // condition - текущее состояние клетки
+    int             check_around(int row, int column);
+    bool            is_correct_cords(int i, int j);
 
-    bool    is_correct_cords(int i, int j);
+signals:
+    void            setCellColorByCondition(int row, int column, bool condition);
+
+private slots:
+    void            initBinaryMap(int rows, int columns);
+    void            switchCellCondition(int row, int column);
+    void            getSettings(int rows, int columns);
+    void            switchGameCondition(GameCondition newCondition);
+    void            nextSnapshot();
 
 private:
-    GameCondition condition;
+    typedef QVector<QVector<CellCondition> > BinaryMap;
+
+    int             rows;
+    int             columns;
+
+    GameCondition   condition;
+    BinaryMap       map;
 };
 
-#endif // LIFE_H
+#endif // Game_H
