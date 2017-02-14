@@ -21,7 +21,6 @@ class MainWindow : public QMainWindow
     Settings*       settingsWidget;
 
     QPushButton*    start; // Манипуляции с итерациями мира
-    QPushButton*    stop;
     QPushButton*    next;
     QPushButton*    prev;
     QPushButton*    first;
@@ -35,11 +34,11 @@ public:
 
 signals:
     void settingsRequest();
-    void changeGameCondition(Game::GameCondition newCondition);
 
 private slots:
     void openSettings();
     void closeSettings();
+    void switchStartButtonTextByGameCondition(Game::GameCondition condition);
 };
 
 #endif // MAINWINDOW_H

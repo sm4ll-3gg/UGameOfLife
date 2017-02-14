@@ -1,13 +1,19 @@
 #include "game.h"
 
+#include <QTimer>
 #include <QDebug>
 
 Game::Game()
 {
     condition = GameCondition::BEFOTRE_GAME;
+    count = 1;
+
+    timer = new QTimer(this);
+    timer->setInterval(500);
+    connect(timer, SIGNAL(timeout()), this, SLOT(nextSnapshot()));
 }
 
-void Game::initBinaryMap(int rows, int columns)
+void Game::initMap(Game::BinaryMap &map, int rows, int columns)
 {
     for(int i = 0; i < rows; ++i)
     {
@@ -19,6 +25,23 @@ void Game::initBinaryMap(int rows, int columns)
     }
 }
 
+void Game::updateSnapshot()
+{
+    for(int i = 0; i < currentMap.size(); ++i)
+    {
+        for(int j = 0; j < currentMap[i].size(); ++j)
+        {
+            emit setCellColorByCondition(i, j, currentMap[i][j]);
+        }
+    }
+}
+
+void Game::initBinaryMap(int rows, int columns)
+{
+    initMap(firstMap, rows, columns);
+    initMap(currentMap, rows, columns);
+}
+
 void Game::switchCellCondition(int row, int column)
 {
     if(condition == GameCondition::DURING_THE_GAME)
@@ -27,63 +50,116 @@ void Game::switchCellCondition(int row, int column)
         return;
     }
 
-    if(map[row][column] == CellCondition::DEAD)
-        map[row][column] = CellCondition::LIVE;
+    if(currentMap[row][column] == CellCondition::DEAD)
+        currentMap[row][column] = CellCondition::LIVE;
     else
-        map[row][column] = CellCondition::DEAD;
+        currentMap[row][column] = CellCondition::DEAD;
+
+    emit cellClicked(row, column);
 }
 
 void Game::getSettings(int _rows, int _columns)
 {
     if(rows != _rows || columns != _columns)
     {
+        qDebug() << "Логика | Настройки успешно получены";
+
         rows = _rows;
         columns = _columns;
 
-        map.resize(rows);
-        for(auto it = map.begin(); it != map.end(); ++it) it->resize(columns);
+        currentMap.resize(rows);
+        for(auto it = currentMap.begin(); it != currentMap.end(); ++it) it->resize(columns);
     }
 }
 
-void Game::switchGameCondition(Game::GameCondition newCondition)
+void Game::firstSnapshot()
 {
-    condition = newCondition;
+    if(count > 1)
+    {
+        currentMap = firstMap;
+        prevMaps.clear();
+        count = 1;
+        updateSnapshot();
+    }
+    else return;
+}
+
+void Game::prevSnapshot()
+{
+    if(!prevMaps.isEmpty())
+    {
+        currentMap = prevMaps.pop();
+        count--;
+        updateSnapshot();
+    }
+    else
+    {
+        qDebug() << "Логика | Попытка вернуться из первого поколения";
+        return;
+    }
 }
 
 void Game::nextSnapshot()
 {
+    if(!prevMaps.isEmpty())
+    {
+        if(currentMap == prevMaps.top())
+        {
+            qDebug() << "Логика | Развитие зашло в тупик";
+            if(condition == GameCondition::DURING_THE_GAME) switchGameConditon();
+        }
+    }
+
+    if(count == 1) firstMap = currentMap;
+    prevMaps.push(currentMap);
+    count++;
+
     step();
+}
+
+void Game::switchGameConditon()
+{
+    if(condition == GameCondition::BEFOTRE_GAME)
+    {
+        qDebug() << "Логика | Игра начата/возобновлена";
+
+        condition = GameCondition::DURING_THE_GAME;
+        emit gameConditionSwitched(condition);
+        timer->start();
+    }
+    else
+    {
+        qDebug() << "Логика | Игра остановлена";
+
+        condition = GameCondition::BEFOTRE_GAME;
+        emit gameConditionSwitched(condition);
+        timer->stop();
+    }
 }
 
 void Game::step()
 {
     BinaryMap temp_map;
 
-    for(int i = 0; i < map.size(); ++i)
+    for(int i = 0; i < currentMap.size(); ++i)
     {
-        temp_map.push_back(QVector<CellCondition>(map[i].size()));
-        for(int j = 0; j < map[i].size(); j++)
+        temp_map.push_back(QVector<CellCondition>(currentMap[i].size()));
+        for(int j = 0; j < currentMap[i].size(); j++)
         {
             temp_map[i][j] = come_to_live(i, j);
         }
     }
 
-    map = temp_map;
+    currentMap = temp_map;
 
-    for(int i = 0; i < map.size(); ++i)
-    {
-        for(int j = 0; j < map[i].size(); ++j)
-        {
-            emit setCellColorByCondition(i, j, map[i][j]);
-        }
-    }
+    updateSnapshot();
 }
 
 Game::CellCondition Game::come_to_live(int row, int column)
 {
     int number = check_around(row, column); // Количество живых клеток вокруг
 
-    if(map[row][column] == CellCondition::LIVE) // если клетка жива
+    if(currentMap[row][column] == CellCondition::LIVE) // если клетка жива
     {
         if(number == 2 || number == 3) return CellCondition::LIVE; // остается живой
     }
@@ -103,7 +179,7 @@ int Game::check_around(int row, int column)
         {
             if(is_correct_cords(i, j))
             {
-                if(map[i][j] == CellCondition::LIVE && (i != row ||  j != column))
+                if(currentMap[i][j] == CellCondition::LIVE && (i != row ||  j != column))
                     count++;
             }
         }
@@ -114,5 +190,5 @@ int Game::check_around(int row, int column)
 
 bool Game::is_correct_cords(int i, int j)
 {
-    return i >= 0 && i < map.size() && j >= 0 && j < map[0].size();
+    return i >= 0 && i < currentMap.size() && j >= 0 && j < currentMap[0].size();
 }

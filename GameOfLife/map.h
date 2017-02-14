@@ -17,11 +17,10 @@ private: // methods
 
 signals:
     void initBinaryMap(int rows, int columns);
-    void switchCellCondition(int row, int column);
     void settingsRequest(int rows, int columns);
 
 private slots:
-    void switchBackground(QTableWidgetItem* item);
+    void switchBackground(int row, int column);
     void getSettings(int rows, int columns);
     void setCellColorByCondition(int row, int column, bool condition);
 };

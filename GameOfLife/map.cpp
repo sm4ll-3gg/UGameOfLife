@@ -35,19 +35,16 @@ void Map::init()
     verticalHeader()->hide();
     horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     horizontalHeader()->hide();
-
-    connect(this,
-            SIGNAL(itemClicked(QTableWidgetItem*)),
-            SLOT(switchBackground(QTableWidgetItem*))
-            );
 }
 
-void Map::switchBackground(QTableWidgetItem* item)
+void Map::switchBackground(int row, int column)
 {
-    if(item->backgroundColor() == Qt::white)
-        item->setBackgroundColor(Qt::red);
+    QTableWidgetItem* currItem = item(row, column);
+
+    if(currItem->backgroundColor() == Qt::white)
+        currItem->setBackgroundColor(Qt::red);
     else
-        item->setBackgroundColor(Qt::white);
+        currItem->setBackgroundColor(Qt::white);
 }
 
 void Map::getSettings(int rows, int columns)
@@ -79,4 +76,3 @@ void Map::setCellColorByCondition(int row, int column, bool condition)
         tempItem->setBackgroundColor(Qt::white);
     else tempItem->setBackgroundColor(Qt::red);
 }
-

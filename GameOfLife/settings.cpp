@@ -45,6 +45,8 @@ Settings::Settings(QWidget *parent) :
     columnsLayout->addWidget(columnsUncorrectValue, Qt::AlignLeft);
     mainLayout->addLayout(columnsLayout, 1, 1, Qt::AlignLeft);
 
+
+
     spacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     mainLayout->addItem(spacer, 2, 0);
 
@@ -52,20 +54,12 @@ Settings::Settings(QWidget *parent) :
     apply = new QPushButton("Apply");
     apply->setMaximumSize(149, 40);
     apply->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    connect(apply,
-            SIGNAL(clicked(bool)),
-            this,
-            SLOT(saveSettings())
-            );
+    connect(apply, SIGNAL(clicked(bool)), this, SLOT(saveSettings()));
     CancelAndApplyLayout->addWidget(apply, 10);
     cancel = new QPushButton("Cancel");
     cancel->setMaximumSize(149, 40);
     cancel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    connect(cancel,
-            SIGNAL(clicked(bool)),
-            this,
-            SLOT(cancelSettingsChanges())
-            );
+    connect(cancel, SIGNAL(clicked(bool)), this, SLOT(cancelSettingsChanges()));
     CancelAndApplyLayout->addWidget(cancel, 10);
     mainLayout->addLayout(CancelAndApplyLayout, 5, 3, Qt::AlignRight);
 
