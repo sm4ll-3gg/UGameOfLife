@@ -21,7 +21,7 @@ signals:
 
 private slots:
     void switchBackground(int row, int column);
-    void getSettings(int rows, int columns);
+    void getSettings(int rows, int columns, int timer);
     void setCellColorByCondition(int row, int column, bool condition);
 };
 

@@ -20,6 +20,7 @@ class MainWindow : public QMainWindow
     Map*            map;
     Settings*       settingsWidget;
 
+    QHBoxLayout*    buttonsLayout;
     QPushButton*    start; // Манипуляции с итерациями мира
     QPushButton*    next;
     QPushButton*    prev;

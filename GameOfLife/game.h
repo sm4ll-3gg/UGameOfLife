@@ -37,7 +37,7 @@ signals:
 private slots:
     void                initBinaryMap(int rows, int columns);
     void                switchCellCondition(int row, int column);
-    void                getSettings(int rows, int columns);
+    void                getSettings(int rows, int columns, int timer);
     void                firstSnapshot();
     void                prevSnapshot();
     void                nextSnapshot();
@@ -46,6 +46,7 @@ private slots:
 private:
     int                 rows;
     int                 columns;
+    int                 timerStep;
 
     int                 count; // Номер поколения
 

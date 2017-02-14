@@ -1,11 +1,11 @@
 #include "settings.h"
 
 #include <QDebug>
-#include <QPalette>
 
 Settings::Settings(QWidget *parent) :
     QWidget(parent),
-    rows(10), columns(10)
+    rows(10), columns(10),
+    timer(500)
 {
     mainLayout = new QGridLayout;
 
@@ -13,9 +13,14 @@ Settings::Settings(QWidget *parent) :
     headerFont.setBold(true);
     headerFont.setPixelSize(18);
 
+    int rowCount = 0;
+    int columnCount = 0;
+
     mapSize = new QLabel("Размер карты игрового поля:");
     mapSize->setFont(headerFont);
-    mainLayout->addWidget(mapSize, 0, 0, Qt::AlignLeft);
+    mainLayout->addWidget(mapSize, rowCount, columnCount, Qt::AlignLeft);
+
+    rowCount++;
 
     rowsLayout = new QHBoxLayout;
     rowsText = new QLabel("Количество строк: ");
@@ -29,7 +34,7 @@ Settings::Settings(QWidget *parent) :
     rowsUncorrectValue->setStyleSheet("color: red; font: italic;");
     rowsUncorrectValue->hide();
     rowsLayout->addWidget(rowsUncorrectValue, Qt::AlignLeft);
-    mainLayout->addLayout(rowsLayout, 1, 0, Qt::AlignLeft);
+    mainLayout->addLayout(rowsLayout, rowCount, 0, Qt::AlignLeft);
 
     columnsLayout = new QHBoxLayout;
     columnsText = new QLabel("Количество столбцов: ");
@@ -43,21 +48,39 @@ Settings::Settings(QWidget *parent) :
     columnsUncorrectValue->setStyleSheet("color: red; font: italic;");
     columnsUncorrectValue->hide();
     columnsLayout->addWidget(columnsUncorrectValue, Qt::AlignLeft);
-    mainLayout->addLayout(columnsLayout, 1, 1, Qt::AlignLeft);
+    mainLayout->addLayout(columnsLayout, rowCount, 1, Qt::AlignLeft);
 
+    rowCount++;
 
+    timerBrowser = new QLabel("Частота ходов (в миллисекундах): ");
+    timerBrowser->setFont(headerFont);
+    mainLayout->addWidget(timerBrowser, rowCount, 0, Qt::AlignLeft);
+    timerSlider = new QSlider(Qt::Horizontal);
+    timerSlider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    timerSlider->setTickPosition(QSlider::TicksAbove);
+    timerSlider->setMinimumSize(200,20);
+    timerSlider->setMaximumSize(500, 20);
+    timerSlider->setRange(100, 2000);
+    timerSlider->setValue(500);
+    timerSlider->setSingleStep(100);
+    timerSlider->setPageStep(100);
+    timerValue = new QLabel;
+    timerValue->setNum(500);
+    connect(timerSlider, SIGNAL(valueChanged(int)), timerValue, SLOT(setNum(int)));
+    mainLayout->addWidget(timerValue, rowCount, 3, Qt::AlignLeft);
+    mainLayout->addWidget(timerSlider, rowCount, 1, Qt::AlignLeft);
 
     spacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
     mainLayout->addItem(spacer, 2, 0);
 
     CancelAndApplyLayout = new QHBoxLayout;
     apply = new QPushButton("Apply");
-    apply->setMaximumSize(149, 40);
+    apply->setMaximumSize(150, 40);
     apply->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     connect(apply, SIGNAL(clicked(bool)), this, SLOT(saveSettings()));
     CancelAndApplyLayout->addWidget(apply, 10);
     cancel = new QPushButton("Cancel");
-    cancel->setMaximumSize(149, 40);
+    cancel->setMaximumSize(150, 40);
     cancel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     connect(cancel, SIGNAL(clicked(bool)), this, SLOT(cancelSettingsChanges()));
     CancelAndApplyLayout->addWidget(cancel, 10);
@@ -85,11 +108,17 @@ bool Settings::isNumber(const QString &string)
 
 void Settings::getSettingsRequest()
 {
-    emit sendSettings(rows, columns);
+    emit sendSettings(rows, columns, timer);
 }
 
 void Settings::saveSettings()
 {
+    /*===========================================================
+     * Когда я начинал писать эту функцию я думал, что это ужасно,
+     * но теперь мое мнение изменилось и я решил, что за такой код
+     * я буду гореть в аду. (если его не исправлю, конечно)
+     ============================================================*/
+
     bool allRight = true;
 
     if(isNumber(rowsBrowser->text()))
@@ -120,9 +149,11 @@ void Settings::saveSettings()
         qDebug() << "Настройки | Введенное количество столбцов не является числом.";
     }
 
+    timer = timerSlider->value();
+
     if(allRight)
     {
-        emit sendSettings(rows, columns);
+        emit sendSettings(rows, columns, timer);
         qDebug() << "Настройки | Настройки успешно изменены";
         emit close();
     } else qDebug() << "Настройки | Ошибка при изменении настроек";
@@ -132,5 +163,7 @@ void Settings::cancelSettingsChanges()
 {
     rowsBrowser->setText(QString::number(rows));
     columnsBrowser->setText(QString::number(columns));
+    timerSlider->setValue(timer);
+
     emit close();
 }

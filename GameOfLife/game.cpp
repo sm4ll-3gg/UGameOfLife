@@ -58,7 +58,7 @@ void Game::switchCellCondition(int row, int column)
     emit cellClicked(row, column);
 }
 
-void Game::getSettings(int _rows, int _columns)
+void Game::getSettings(int _rows, int _columns, int _timer)
 {
     if(rows != _rows || columns != _columns)
     {
@@ -70,6 +70,9 @@ void Game::getSettings(int _rows, int _columns)
         currentMap.resize(rows);
         for(auto it = currentMap.begin(); it != currentMap.end(); ++it) it->resize(columns);
     }
+
+    timerStep = _timer;
+    timer->setInterval(timerStep);
 }
 
 void Game::firstSnapshot()

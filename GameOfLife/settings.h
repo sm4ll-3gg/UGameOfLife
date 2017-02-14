@@ -9,6 +9,7 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QSlider>
 
 class Settings : public QWidget
 {
@@ -22,7 +23,7 @@ private:
     bool            isNumber(const QString& string);
 
 signals:
-    void            sendSettings(int rows, int columns);
+    void            sendSettings(int rows, int columns, int timer);
     void            close();
 
 private slots:
@@ -33,6 +34,7 @@ private slots:
 private:
     int             rows;
     int             columns;
+    int             timer;
 
     QGridLayout*    mainLayout;
 
@@ -47,6 +49,10 @@ private:
     QLabel*         columnsText;
     QLineEdit*      columnsBrowser;
     QLabel*         columnsUncorrectValue;
+
+    QLabel*         timerBrowser;
+    QSlider*        timerSlider;
+    QLabel*         timerValue;
 
     QSpacerItem*    spacer;
 
