@@ -113,50 +113,39 @@ void Settings::getSettingsRequest()
 
 void Settings::saveSettings()
 {
-    /*===========================================================
-     * Когда я начинал писать эту функцию я думал, что это ужасно,
-     * но теперь мое мнение изменилось и я решил, что за такой код
-     * я буду гореть в аду. (если его не исправлю, конечно)
-     ============================================================*/
-
-    bool allRight = true;
-
-    if(isNumber(rowsBrowser->text()))
-    {
-        rows = rowsBrowser->text().toInt();
-        if(!rowsUncorrectValue->isHidden()) rowsUncorrectValue->setHidden(true);
-        allRight = true;
-        qDebug() << "Настройки | Изменено число строк";
-    }
-    else
-    {
-        if(rowsUncorrectValue->isHidden()) rowsUncorrectValue->setHidden(false);
-        allRight = false;
-        qDebug() << "Настройки | Введенное количество строк не является числом.";
-    }
-
-    if(isNumber(columnsBrowser->text()))
-    {
-        columns = columnsBrowser->text().toInt();
-        if(!columnsUncorrectValue->isHidden()) columnsUncorrectValue->setHidden(true);
-        allRight = true;
-        qDebug() << "Настройки | Изменено число столбцов";
-    }
-    else
-    {
-        if(columnsUncorrectValue->isHidden()) columnsUncorrectValue->setHidden(false);
-        allRight = false;
-        qDebug() << "Настройки | Введенное количество столбцов не является числом.";
-    }
-
     timer = timerSlider->value();
 
-    if(allRight)
+    bool* isOk = new bool(true);
+
+    int temp = rowsBrowser->text().toInt(isOk);
+    if(*isOk)
     {
-        emit sendSettings(rows, columns, timer);
-        qDebug() << "Настройки | Настройки успешно изменены";
-        emit close();
-    } else qDebug() << "Настройки | Ошибка при изменении настроек";
+        rows = temp;
+        rowsUncorrectValue->hide();
+    }
+    else
+    {
+        rowsUncorrectValue->setHidden(false);
+        qDebug() << "Настройки | Некорректно задано количество строк";
+        return;
+    }
+
+    temp = columnsBrowser->text().toInt(isOk);
+    if(*isOk)
+    {
+        columns = temp;
+        columnsUncorrectValue->hide();
+    }
+    else
+    {
+        columnsUncorrectValue->setHidden(false);
+        qDebug() << "Настройки | Некорректно задано количество строк";
+        return;
+    }
+
+    emit sendSettings(rows, columns, timer);
+    qDebug() << "Настройки | Настройки успешно изменены";
+    emit close();
 }
 
 void Settings::cancelSettingsChanges()

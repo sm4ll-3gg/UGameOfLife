@@ -10,8 +10,11 @@ MainWindow::MainWindow(QWidget *parent)
     resize(1000, 600);
 
     cWidget = new QWidget;
+    cLayout = new QHBoxLayout(cWidget);
 
-    mainLayout = new QGridLayout(cWidget);
+    mainWidget = new QWidget;
+    cLayout->addWidget(mainWidget);
+    mainLayout = new QGridLayout(mainWidget);
 
     game = new Game;
     connect(game, SIGNAL(gameConditionSwitched(Game::GameCondition)), this, SLOT(switchStartButtonTextByGameCondition(Game::GameCondition)));
@@ -58,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(settingsWidget, SIGNAL(sendSettings(int,int,int)), game, SLOT(getSettings(int,int,int)));
     connect(settingsWidget, SIGNAL(sendSettings(int,int,int)), map, SLOT(getSettings(int,int,int)));
     connect(settingsWidget, SIGNAL(close()), this, SLOT(closeSettings()));
-    mainLayout->addWidget(settingsWidget, 0, 0, mainLayout->rowCount()-1, mainLayout->columnCount());
+    cLayout->addWidget(settingsWidget);
 
     setCentralWidget(cWidget);
 
@@ -72,15 +75,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::openSettings()
 {
-    map->hide();
+    mainWidget->hide();
     settingsWidget->setHidden(false);
+
     qDebug() << "Интерфейс | Открыты настройки";
 }
 
 void MainWindow::closeSettings()
 {
     settingsWidget->hide();
-    map->setHidden(false);
+    mainWidget->setHidden(false);
+
     qDebug() << "Интерфейс | Закрыты настройки";
 }
 

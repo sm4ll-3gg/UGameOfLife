@@ -14,7 +14,9 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     QWidget*        cWidget;
+    QHBoxLayout*    cLayout;
 
+    QWidget*        mainWidget;
     QGridLayout*    mainLayout;
 
     Map*            map;
