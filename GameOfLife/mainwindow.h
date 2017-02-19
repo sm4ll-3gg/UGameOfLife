@@ -27,6 +27,7 @@ class MainWindow : public QMainWindow
     QPushButton*    next;
     QPushButton*    prev;
     QPushButton*    first;
+    QPushButton*    clear;
     QPushButton*    settings;
 
     Game*           game; // Логика игры

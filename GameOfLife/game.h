@@ -42,6 +42,7 @@ private slots:
     void                prevSnapshot();
     void                nextSnapshot();
     void                switchGameConditon();
+    void                clear();
 
 private:
     int                 rows;

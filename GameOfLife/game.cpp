@@ -140,6 +140,13 @@ void Game::switchGameConditon()
     }
 }
 
+void Game::clear()
+{
+    prevMaps.clear();
+    firstMap.clear();
+    currentMap.clear();
+}
+
 void Game::step()
 {
     BinaryMap temp_map;

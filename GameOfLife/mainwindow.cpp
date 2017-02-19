@@ -48,6 +48,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(next, SIGNAL(clicked(bool)), game, SLOT(nextSnapshot()));
     buttonsLayout->addWidget(next);
 
+    clear = new QPushButton("Clear");
+    clear->setMinimumSize(50, 50);
+    connect(clear, SIGNAL(clicked(bool)), map, SLOT(clear()));
+    connect(clear, SIGNAL(clicked(bool)), game, SLOT(clear()));
+    buttonsLayout->addWidget(clear);
+
     settings = new QPushButton("Settings");
     settings->setMinimumSize(50, 50);
     connect(settings, SIGNAL(clicked(bool)), SLOT(openSettings()));
