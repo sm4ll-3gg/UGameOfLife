@@ -3,6 +3,7 @@
 
 #include <QTableWidget>
 #include <QVector>
+#include <QSettings>
 
 class Map : public QTableWidget
 {
@@ -21,7 +22,7 @@ signals:
 
 private slots:
     void switchBackground(int row, int column);
-    void getSettings(int rows, int columns, int timer);
+    void getSettings(QSettings &settings);
     void setCellColorByCondition(int row, int column, bool condition);
 };
 

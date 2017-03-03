@@ -3,11 +3,12 @@
 #include <QDebug>
 
 Settings::Settings(QWidget *parent) :
-    QWidget(parent),
-    rows(10), columns(10),
-    timer(500)
+    QWidget(parent)
 {
+    readSettings();
+
     mainLayout = new QGridLayout;
+    mainLayout->setSpacing(20);
 
     QFont headerFont;
     headerFont.setBold(true);
@@ -26,7 +27,7 @@ Settings::Settings(QWidget *parent) :
     rowsText = new QLabel("Количество строк: ");
     rowsLayout->addWidget(rowsText, 0, Qt::AlignLeft);
     rowsBrowser = new QLineEdit;
-    rowsBrowser->setText("10");
+    rowsBrowser->setText( settings.value("/Settings/rows", "10").toString() );
     rowsBrowser->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     rowsBrowser->setMaximumSize(1000,30);
     rowsLayout->addWidget(rowsBrowser, 5, Qt::AlignLeft);
@@ -40,7 +41,7 @@ Settings::Settings(QWidget *parent) :
     columnsText = new QLabel("Количество столбцов: ");
     columnsLayout->addWidget(columnsText, 0, Qt::AlignLeft);
     columnsBrowser = new QLineEdit;
-    columnsBrowser->setText("10");
+    columnsBrowser->setText( settings.value("/Settings/columns", "10").toString() );
     columnsBrowser->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     columnsBrowser->setMaximumSize(1000, 30);
     columnsLayout->addWidget(columnsBrowser, 5, Qt::AlignLeft);
@@ -61,17 +62,58 @@ Settings::Settings(QWidget *parent) :
     timerSlider->setMinimumSize(200,20);
     timerSlider->setMaximumSize(500, 20);
     timerSlider->setRange(100, 2000);
-    timerSlider->setValue(500);
+    timerSlider->setValue( settings.value("/Settings/timer_delay", 500).toInt() );
     timerSlider->setSingleStep(100);
     timerSlider->setPageStep(100);
     timerValue = new QLabel;
-    timerValue->setNum(500);
+    timerValue->setNum( settings.value("/Settings/timer_delay", 500).toInt() );
     connect(timerSlider, SIGNAL(valueChanged(int)), timerValue, SLOT(setNum(int)));
     mainLayout->addWidget(timerValue, rowCount, 3, Qt::AlignLeft);
     mainLayout->addWidget(timerSlider, rowCount, 1, Qt::AlignLeft);
 
-    spacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding);
-    mainLayout->addItem(spacer, 2, 0);
+    rowCount++;
+
+    gameSettingsLayout = new QGridLayout;
+    gameSettingsHeader = new QLabel("Игровые настройки:");
+    gameSettingsHeader->setFont(headerFont);
+    gameSettingsLayout->addWidget(gameSettingsHeader, 0, 0, 1, gameSettingsLayout->columnCount(), Qt::AlignLeft);
+
+    numberToAliveLayout = new QHBoxLayout;
+    numberToAliveLabel = new QLabel("Количество живых клеток вокруг для зарождения жизни: ");
+    numberToAliveLayout->addWidget(numberToAliveLabel);
+    numberToAliveField = new QSpinBox;
+    numberToAliveField->setMinimumSize(30, 30);
+    numberToAliveField->setButtonSymbols(QSpinBox::PlusMinus);
+    numberToAliveField->setRange(1, 8);
+    numberToAliveField->setValue(numberToAlive);
+    numberToAliveField->setWrapping(true);
+    numberToAliveLayout->addWidget(numberToAliveField, 0, Qt::AlignLeft);
+    gameSettingsLayout->addLayout(numberToAliveLayout, 1, 0, 1, gameSettingsLayout->columnCount(), Qt::AlignLeft);
+
+    numberToSurviveLayout = new QHBoxLayout;
+    numberToSurviveFromLabel = new QLabel("Количество живых клеток вокруд для выживания: от ");
+    numberToSurviveLayout->addWidget(numberToSurviveFromLabel);
+    minimumNumberToSurviveField = new QSpinBox;
+    minimumNumberToSurviveField->setRange(0, 8);
+    minimumNumberToSurviveField->setValue(minimumNumberToSurvive);
+    minimumNumberToSurviveField->setWrapping(true);
+    connect(minimumNumberToSurviveField, SIGNAL(valueChanged(int)), this, SLOT(minimumNumberToSurviveChanged(int)));
+    numberToSurviveLayout->addWidget(minimumNumberToSurviveField);
+    numberToSurviveToLabel = new QLabel(" до ");
+    numberToSurviveLayout->addWidget(numberToSurviveToLabel);
+    maximumNumberToSurviveField = new QSpinBox;
+    maximumNumberToSurviveField->setRange(minimumNumberToSurvive, 8);
+    maximumNumberToSurviveField->setValue(maximumNumberToSurvive);
+    maximumNumberToSurviveField->setWrapping(true);
+    numberToSurviveLayout->addWidget(maximumNumberToSurviveField);
+    gameSettingsLayout->addLayout(numberToSurviveLayout, 2, 0, 1, gameSettingsLayout->columnCount(), Qt::AlignLeft);
+
+    mainLayout->addLayout(gameSettingsLayout, rowCount, 0, 1, mainLayout->columnCount());
+
+    rowCount++;
+
+    spacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mainLayout->addItem(spacer, rowCount, 0);
 
     CancelAndApplyLayout = new QHBoxLayout;
     apply = new QPushButton("Apply");
@@ -106,19 +148,50 @@ bool Settings::isNumber(const QString &string)
     return true;
 }
 
+void Settings::readSettings()
+{
+    settings.beginGroup("/Settings");
+
+    rows = settings.value("/rows", 10).toInt();
+    columns = settings.value("/columns", 10).toInt();
+    timer = settings.value("/timer_delay", 500).toInt();
+    numberToAlive = settings.value("/number_to_alive", 3).toInt();
+    minimumNumberToSurvive = settings.value("/minimum_number_to_survive", 2).toInt();
+    maximumNumberToSurvive = settings.value("/maximum_number_to_survive", 3).toInt();
+
+    settings.endGroup();
+}
+
+void Settings::writeSettings()
+{
+    settings.beginGroup("/Settings");
+
+    settings.setValue("/rows", rows);
+    settings.setValue("/columns", columns);
+    settings.setValue("/timer_delay", timer);
+    settings.setValue("/number_to_alive", numberToAlive);
+    settings.setValue("/minimum_number_to_survive", minimumNumberToSurvive);
+    settings.setValue("/maximum_number_to_survive", maximumNumberToSurvive);
+
+    settings.endGroup();
+}
+
 void Settings::getSettingsRequest()
 {
-    emit sendSettings(rows, columns, timer);
+    emit sendSettings(settings);
 }
 
 void Settings::saveSettings()
 {
     timer = timerSlider->value();
+    numberToAlive = numberToAliveField->value();
+    minimumNumberToSurvive = minimumNumberToSurviveField->value();
+    maximumNumberToSurvive = maximumNumberToSurviveField->value();
 
-    bool* isOk = new bool(true);
+    bool isOk = true;
 
-    int temp = rowsBrowser->text().toInt(isOk);
-    if(*isOk)
+    int temp = rowsBrowser->text().toInt(&isOk);
+    if(isOk)
     {
         rows = temp;
         rowsUncorrectValue->hide();
@@ -130,8 +203,8 @@ void Settings::saveSettings()
         return;
     }
 
-    temp = columnsBrowser->text().toInt(isOk);
-    if(*isOk)
+    temp = columnsBrowser->text().toInt(&isOk);
+    if(isOk)
     {
         columns = temp;
         columnsUncorrectValue->hide();
@@ -143,7 +216,9 @@ void Settings::saveSettings()
         return;
     }
 
-    emit sendSettings(rows, columns, timer);
+    writeSettings();
+
+    emit sendSettings(settings);
     qDebug() << "Настройки | Настройки успешно изменены";
     emit close();
 }
@@ -155,4 +230,9 @@ void Settings::cancelSettingsChanges()
     timerSlider->setValue(timer);
 
     emit close();
+}
+
+void Settings::minimumNumberToSurviveChanged(int minimum)
+{
+    maximumNumberToSurviveField->setRange(minimum, 8);
 }

@@ -47,8 +47,13 @@ void Map::switchBackground(int row, int column)
         currItem->setBackgroundColor(Qt::white);
 }
 
-void Map::getSettings(int rows, int columns, int timer)
+void Map::getSettings(QSettings &settings)
 {
+    settings.beginGroup("/Settings");
+    int rows = settings.value("/rows", rowCount()).toInt();
+    int columns = settings.value("/columns", columnCount()).toInt();
+    settings.endGroup();
+
     if(rowCount() != rows || columnCount() != columns)
     {
         setRowCount(rows);

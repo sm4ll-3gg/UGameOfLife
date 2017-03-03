@@ -10,6 +10,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSlider>
+#include <QSettings>
+#include <QSpinBox>
 
 class Settings : public QWidget
 {
@@ -19,22 +21,30 @@ public:
     explicit Settings(QWidget *parent = 0);
     ~Settings();
 
-private:
-    bool            isNumber(const QString& string);
-
 signals:
-    void            sendSettings(int rows, int columns, int timer);
+    void            sendSettings(QSettings& settings);
     void            close();
 
 private slots:
     void            getSettingsRequest();
     void            saveSettings();
     void            cancelSettingsChanges();
+    void            minimumNumberToSurviveChanged(int minimum);
 
 private:
+    bool            isNumber(const QString& string);
+
+    void            readSettings();
+    void            writeSettings();
+
+private:
+    QSettings       settings;
     int             rows;
     int             columns;
     int             timer;
+    short           numberToAlive;
+    short           minimumNumberToSurvive;
+    short           maximumNumberToSurvive;
 
     QGridLayout*    mainLayout;
 
@@ -53,6 +63,17 @@ private:
     QLabel*         timerBrowser;
     QSlider*        timerSlider;
     QLabel*         timerValue;
+
+    QGridLayout*    gameSettingsLayout;
+    QLabel*         gameSettingsHeader;
+    QHBoxLayout*    numberToAliveLayout;
+    QLabel*         numberToAliveLabel;
+    QSpinBox*       numberToAliveField;
+    QHBoxLayout*    numberToSurviveLayout;
+    QLabel*         numberToSurviveFromLabel;
+    QSpinBox*       minimumNumberToSurviveField;
+    QLabel*         numberToSurviveToLabel;
+    QSpinBox*       maximumNumberToSurviveField;
 
     QSpacerItem*    spacer;
 

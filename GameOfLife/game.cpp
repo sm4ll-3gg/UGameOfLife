@@ -31,7 +31,12 @@ void Game::updateSnapshot()
     {
         for(int j = 0; j < currentMap[i].size(); ++j)
         {
-            emit setCellColorByCondition(i, j, currentMap[i][j]);
+            CellCondition currCondition = currentMap[i][j];
+
+            if(currCondition == CellCondition::LIVE)
+                emit setCellColorByCondition(i, j, true);
+            else
+                emit setCellColorByCondition(i, j, false);
         }
     }
 }
@@ -58,8 +63,17 @@ void Game::switchCellCondition(int row, int column)
     emit cellClicked(row, column);
 }
 
-void Game::getSettings(int _rows, int _columns, int _timer)
+void Game::getSettings(QSettings &settings)
 {
+    settings.beginGroup("/Settings");
+    int _rows = settings.value("/rows", rows).toInt();
+    int _columns = settings.value("/columns", columns).toInt();
+    int _timer = settings.value("/timer_delay", timerStep).toInt();
+    numberToAlive = settings.value("/number_to_alive", numberToAlive).toInt();
+    minimumNumberToSurvive = settings.value("/minimum_number_to_survive", minimumNumberToSurvive).toInt();
+    maximumNumberToSurvive = settings.value("/maximum_number_to_survive", maximumNumberToSurvive).toInt();
+    settings.endGroup();
+
     if(rows != _rows || columns != _columns)
     {
         qDebug() << "Логика | Настройки успешно получены";
@@ -171,10 +185,10 @@ Game::CellCondition Game::come_to_live(int row, int column)
 
     if(currentMap[row][column] == CellCondition::LIVE) // если клетка жива
     {
-        if(number == 2 || number == 3) return CellCondition::LIVE; // остается живой
+        if(number >= minimumNumberToSurvive && number <= maximumNumberToSurvive) return CellCondition::LIVE; // остается живой
     }
     else
-        if(number == 3) return CellCondition::LIVE; // оживает
+        if(number == numberToAlive) return CellCondition::LIVE; // оживает
 
     return CellCondition::DEAD; // умирает / остается мертвой
 }

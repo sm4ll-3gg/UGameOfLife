@@ -6,14 +6,15 @@
 #include <QObject>
 #include <QVector>
 #include <QStack>
+#include <QSettings>
 
 class Game : public QObject
 {
     Q_OBJECT
 
 public:
-    enum CellCondition { DEAD = 0, LIVE = 1 };
-    enum GameCondition { BEFOTRE_GAME = 0, DURING_THE_GAME = 1 };
+    enum class CellCondition { DEAD = 0, LIVE = 1 };
+    enum class GameCondition { BEFOTRE_GAME = 0, DURING_THE_GAME = 1 };
 
     Game();
 
@@ -37,7 +38,7 @@ signals:
 private slots:
     void                initBinaryMap(int rows, int columns);
     void                switchCellCondition(int row, int column);
-    void                getSettings(int rows, int columns, int timer);
+    void                getSettings(QSettings& settings);
     void                firstSnapshot();
     void                prevSnapshot();
     void                nextSnapshot();
@@ -48,6 +49,9 @@ private:
     int                 rows;
     int                 columns;
     int                 timerStep;
+    short               numberToAlive;
+    short               minimumNumberToSurvive;
+    short               maximumNumberToSurvive;
 
     int                 count; // Номер поколения
 

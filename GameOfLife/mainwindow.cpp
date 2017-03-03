@@ -64,8 +64,8 @@ MainWindow::MainWindow(QWidget *parent)
     settingsWidget = new Settings;
     settingsWidget->hide();
     connect(this, SIGNAL(settingsRequest()), settingsWidget, SLOT(getSettingsRequest()));
-    connect(settingsWidget, SIGNAL(sendSettings(int,int,int)), game, SLOT(getSettings(int,int,int)));
-    connect(settingsWidget, SIGNAL(sendSettings(int,int,int)), map, SLOT(getSettings(int,int,int)));
+    connect(settingsWidget, SIGNAL(sendSettings(QSettings&)), game, SLOT(getSettings(QSettings&)));
+    connect(settingsWidget, SIGNAL(sendSettings(QSettings&)), map, SLOT(getSettings(QSettings&)));
     connect(settingsWidget, SIGNAL(close()), this, SLOT(closeSettings()));
     cLayout->addWidget(settingsWidget);
 
